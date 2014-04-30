@@ -4,7 +4,7 @@
 #define PERCENT_OXYGEN_PKEY 1
 
 // You can define defaults for values in persistent storage
-#define PERCENT_OXYGEN_DEFAULT 21
+#define PERCENT_OXYGEN_DEFAULT 32
 
 #define MAXIMUM_PARTIAL_PRESSURE 1.4
   
@@ -18,6 +18,7 @@ static ActionBarLayer *action_bar;
 static TextLayer *header_text_layer;
 static TextLayer *body_text_layer;
 static TextLayer *label_text_layer;
+static TextLayer *extra_text_layer;
 
 // We'll save the count in memory from persistent storage
 static int percent_oxygen = PERCENT_OXYGEN_DEFAULT;
@@ -25,23 +26,39 @@ static int percent_oxygen = PERCENT_OXYGEN_DEFAULT;
 static int update_MOD()
 {
   float temp = 100 * (MAXIMUM_PARTIAL_PRESSURE / percent_oxygen);
-  temp = (temp - 1)*33;
-  return temp;
+  return (temp - 1)*33;
+}
+
+static bool needs_warning(int depth)
+{
+  if(depth >= 130)
+  {
+    return true;
+  }
+  
+  return false;
 }
 
 static void update_text() {
+  int MOD = update_MOD();
+  
   static char body_text[50];
   snprintf(body_text, sizeof(body_text), "%u%% Oxygen", percent_oxygen);
   text_layer_set_text(body_text_layer, body_text);
   
   static char label_text[50];
-  snprintf(label_text, sizeof(label_text), "MOD: %u feet", update_MOD());
+  snprintf(label_text, sizeof(label_text), "MOD: %u feet", MOD);
   text_layer_set_text(label_text_layer, label_text);
+  
+  static char extra_text[100];
+  snprintf(extra_text, sizeof(extra_text), 
+           needs_warning(MOD) ? "Warning: the recreational depth limit is 130 feet." : "This application is not a replacement for a dive table or computer");
+  text_layer_set_text(extra_text_layer, extra_text);
 }
 
 static void increment_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if (percent_oxygen >= 100) {
-    // Keep the counter at 100
+  if (percent_oxygen >= 99) {
+    // Keep the counter at 99
     return;
   }
   
@@ -50,8 +67,8 @@ static void increment_click_handler(ClickRecognizerRef recognizer, void *context
 }
 
 static void decrement_click_handler(ClickRecognizerRef recognizer, void *context) {
-  if (percent_oxygen <= 0) {
-    // Keep the counter at zero
+  if (percent_oxygen <= 1) {
+    // Keep the counter at one
     return;
   }
 
@@ -82,15 +99,20 @@ static void window_load(Window *me) {
   text_layer_set_text(header_text_layer, "MOD Calculator");
   layer_add_child(layer, text_layer_get_layer(header_text_layer));
 
-  body_text_layer = text_layer_create(GRect(4, 44, width, 60));
+  body_text_layer = text_layer_create(GRect(4, 38, width, 60));
   text_layer_set_font(body_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
   text_layer_set_background_color(body_text_layer, GColorClear);
   layer_add_child(layer, text_layer_get_layer(body_text_layer));
 
-  label_text_layer = text_layer_create(GRect(4, 44 + 28, width, 60));
-  text_layer_set_font(label_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+  label_text_layer = text_layer_create(GRect(4, 38 + 28, width, 60));
+  text_layer_set_font(label_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
   text_layer_set_background_color(label_text_layer, GColorClear);
   layer_add_child(layer, text_layer_get_layer(label_text_layer));
+  
+  extra_text_layer = text_layer_create(GRect(4,105, width, 60));
+  text_layer_set_font(extra_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+  text_layer_set_background_color(extra_text_layer, GColorClear);
+  layer_add_child(layer, text_layer_get_layer(extra_text_layer));
 
   update_text();
 }
@@ -99,6 +121,7 @@ static void window_unload(Window *window) {
   text_layer_destroy(header_text_layer);
   text_layer_destroy(body_text_layer);
   text_layer_destroy(label_text_layer);
+  text_layer_destroy(extra_text_layer);
 
   action_bar_layer_destroy(action_bar);
 }

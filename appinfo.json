@@ -1,0 +1,35 @@
+{
+    "companyName": "Paul Kusisto",
+    "longName": "Simple MOD Calculator",
+    "uuid": "656aeca8-a093-4ed2-8631-16597b0a794f",
+    "capabilities": [
+        ""
+    ],
+    "versionLabel": "1.0",
+    "appKeys": {},
+    "watchapp": {
+        "watchface": false
+    },
+    "versionCode": 1,
+    "resources": {
+        "media": [
+            {
+                "file": "images/EANx.png",
+                "menuIcon": true,
+                "name": "IMAGE_ICON_LOGO",
+                "type": "png"
+            },
+            {
+                "file": "images/action_icon_minus.png",
+                "name": "IMAGE_ACTION_ICON_MINUS",
+                "type": "png"
+            },
+            {
+                "file": "images/action_icon_plus.png",
+                "name": "IMAGE_ACTION_ICON_PLUS",
+                "type": "png"
+            }
+        ]
+    },
+    "shortName": "MOD Calculator"
+}
